@@ -1,12 +1,13 @@
-from fastapi import HTTPException, Security, status
+from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from app.config.settings import settings
 from typing import Optional
 
-security = HTTPBearer()
+mandatory_security = HTTPBearer()
+optional_security = HTTPBearer(auto_error=False)
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)) -> dict:
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(mandatory_security)) -> dict:
     try:
         token = credentials.credentials
         payload = jwt.decode(
@@ -22,7 +23,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-def optional_verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False)) -> Optional[dict]:
+def optional_verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security)) -> Optional[dict]:
     if credentials is None:
         return None
     try:
