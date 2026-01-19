@@ -1,1 +1,0 @@
-# BBP-api-gateway-service
