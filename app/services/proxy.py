@@ -3,11 +3,9 @@ from fastapi import HTTPException, Request
 from typing import Optional
 from app.config.settings import settings
 from app.utils.circuit_breaker import circuit_breaker
-
 class ServiceProxy:
     def __init__(self):
         self.client = httpx.AsyncClient(timeout=settings.SERVICE_REQUEST_TIMEOUT)
-   
     async def forward_request(
         self,
         service_name: str,
@@ -23,16 +21,13 @@ class ServiceProxy:
                 status_code=503,
                 detail=f"{service_name} service is currently unavailable"
             )
-       
         try:
             url = f"{service_url}{path}"
-           
             filtered_headers = {}
             if headers:
                 for key, value in headers.items():
                     if key.lower() not in ['host', 'content-length']:
                         filtered_headers[key] = value
-           
             response = await self.client.request(
                 method=method,
                 url=url,
@@ -40,35 +35,21 @@ class ServiceProxy:
                 json=body if body else None,
                 params=query_params
             )
-           
             response_content = response.json() if response.content else None
-           
             is_service_down = (
                 response_content
                 and isinstance(response_content, dict)
                 and response_content.get("message") == "Application not found"
             )
-           
             if response.status_code >= 500 or is_service_down:
                 circuit_breaker.record_failure(service_name)
-            elif response.status_code == 404:
-                if response_content == "Not Found" or not isinstance(response_content, dict):
-                    circuit_breaker.record_failure(service_name)
-                else:
-                    circuit_breaker.record_success(service_name)
-            elif 200 <= response.status_code < 400:
-                circuit_breaker.record_success(service_name)
-            elif 400 <= response.status_code < 500:
-                circuit_breaker.record_success(service_name)
             else:
-                circuit_breaker.record_failure(service_name)
-           
+                circuit_breaker.record_success(service_name)
             return {
                 "status_code": response.status_code,
                 "content": response_content,
                 "headers": dict(response.headers)
             }
-           
         except httpx.TimeoutException:
             circuit_breaker.record_failure(service_name)
             raise HTTPException(
@@ -87,8 +68,6 @@ class ServiceProxy:
                 status_code=500,
                 detail=f"Error communicating with {service_name} service"
             )
-   
     async def close(self):
         await self.client.aclose()
-
 proxy = ServiceProxy()
