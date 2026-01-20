@@ -52,7 +52,7 @@ class ServiceProxy:
             if response.status_code >= 500 or is_service_down:
                 circuit_breaker.record_failure(service_name)
             elif response.status_code == 404:
-                if response_content is None or not isinstance(response_content, dict):
+                if response_content == "Not Found" or not isinstance(response_content, dict):
                     circuit_breaker.record_failure(service_name)
                 else:
                     circuit_breaker.record_success(service_name)
