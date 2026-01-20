@@ -94,6 +94,8 @@ class ServiceProxy:
         if status != 404:
             return False
 
+        print(f"DEBUG RAILWAY CHECK: status={status}, is_json={is_json}, content={content}, type(content)={type(content)}")
+
         if is_json and isinstance(content, dict):
             detail = content.get("detail")
             if detail == "Not Found":
