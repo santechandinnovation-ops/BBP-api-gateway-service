@@ -51,17 +51,13 @@ class ServiceProxy:
 
             print(f"[CIRCUIT BREAKER DEBUG] Service: {service_name}, Status: {response.status_code}")
 
-            # Logica semplificata: 404 e 5xx = FALLIMENTO, 2xx-3xx = SUCCESSO
-            if response.status_code == 404 or response.status_code >= 500:
+            # Only 5xx errors are service failures. 4xx (including 404) are valid responses
+            if response.status_code >= 500:
                 print(f"[CIRCUIT BREAKER] Recording FAILURE for {service_name} (status={response.status_code})")
                 circuit_breaker.record_failure(service_name)
-            elif 200 <= response.status_code < 400:
+            elif 200 <= response.status_code < 500:
                 print(f"[CIRCUIT BREAKER] Recording SUCCESS for {service_name} (status={response.status_code})")
                 circuit_breaker.record_success(service_name)
-            else:
-                # Altri 4xx (401, 403, ecc.) non influenzano il circuit breaker
-                print(f"[CIRCUIT BREAKER] Ignoring status {response.status_code} for circuit breaker (client error)")
-                pass
 
             return {
                 "status_code": response.status_code,
