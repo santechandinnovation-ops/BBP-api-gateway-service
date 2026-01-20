@@ -41,11 +41,22 @@ class ServiceProxy:
                 params=query_params
             )
 
-            circuit_breaker.record_success(service_name)
+            response_content = response.json() if response.content else None
+
+            is_service_down = (
+                response_content
+                and isinstance(response_content, dict)
+                and response_content.get("message") == "Application not found"
+            )
+
+            if response.status_code >= 500 or is_service_down:
+                circuit_breaker.record_failure(service_name)
+            else:
+                circuit_breaker.record_success(service_name)
 
             return {
                 "status_code": response.status_code,
-                "content": response.json() if response.content else None,
+                "content": response_content,
                 "headers": dict(response.headers)
             }
 
