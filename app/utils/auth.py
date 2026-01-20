@@ -4,9 +4,10 @@ from jose import JWTError, jwt
 from app.config.settings import settings
 from typing import Optional
 
-security = HTTPBearer()
+security_strict = HTTPBearer()
+security_optional = HTTPBearer(auto_error=False)
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)) -> dict:
+def verify_token(credentials: HTTPAuthorizationCredentials = Security(security_strict)) -> dict:
     try:
         token = credentials.credentials
         payload = jwt.decode(
@@ -22,7 +23,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-def optional_verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False)) -> Optional[dict]:
+def optional_verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Security(security_optional)) -> Optional[dict]:
     if credentials is None:
         return None
     try:
