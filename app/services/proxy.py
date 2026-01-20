@@ -91,26 +91,21 @@ class ServiceProxy:
         is_json: bool,
         content_type: str
     ) -> bool:
-        """
-        Rileva se il 404 (o altro codice) è dovuto al fatto che Railway non ha trovato il servizio
-        """
         if status != 404:
             return False
-
 
         if is_json and isinstance(content, dict):
             detail = content.get("detail")
             if detail == "Not Found":
                 return True
 
-            message = content.get("message", "")
-            if any(phrase in message.lower() for phrase in [
+            message = content.get("message", "").lower()
+            if any(phrase in message for phrase in [
                 "application not found",
                 "service not found",
                 "not deployed"
             ]):
                 return True
-
 
         if not content or not is_json:
             if "text/html" in content_type.lower() or not content:
