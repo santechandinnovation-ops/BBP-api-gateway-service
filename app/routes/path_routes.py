@@ -3,28 +3,17 @@ from typing import Optional
 from app.services.proxy import proxy
 from app.config.settings import settings
 from app.utils.auth import verify_token, optional_verify_token
+from app.middleware.rate_limit import limiter
 
 router = APIRouter(prefix="/paths", tags=["Paths"])
 
-@router.post("")
-async def create_path(request: Request, token_payload: dict = Depends(verify_token)):
-    body = await request.json()
-    response = await proxy.forward_request(
-        service_name="path-service",
-        service_url=settings.PATH_SERVICE_URL,
-        path="/paths",
-        method="POST",
-        headers=dict(request.headers),
-        body=body
-    )
-    return response["content"]
-
 @router.get("")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def list_paths(request: Request, token_payload: Optional[dict] = Depends(optional_verify_token)):
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path="/paths",
+        path="/",
         method="GET",
         headers=dict(request.headers),
         query_params=dict(request.query_params)
@@ -32,11 +21,12 @@ async def list_paths(request: Request, token_payload: Optional[dict] = Depends(o
     return response["content"]
 
 @router.get("/search")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def search_paths(request: Request, token_payload: Optional[dict] = Depends(optional_verify_token)):
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path="/paths/search",
+        path="/search",
         method="GET",
         headers=dict(request.headers),
         query_params=dict(request.query_params)
@@ -44,11 +34,12 @@ async def search_paths(request: Request, token_payload: Optional[dict] = Depends
     return response["content"]
 
 @router.get("/{path_id}")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def get_path(path_id: str, request: Request, token_payload: Optional[dict] = Depends(optional_verify_token)):
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path=f"/paths/{path_id}",
+        path=f"/{path_id}",
         method="GET",
         headers=dict(request.headers),
         query_params=dict(request.query_params)
@@ -56,12 +47,13 @@ async def get_path(path_id: str, request: Request, token_payload: Optional[dict]
     return response["content"]
 
 @router.put("/{path_id}")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def update_path(path_id: str, request: Request, token_payload: dict = Depends(verify_token)):
     body = await request.json()
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path=f"/paths/{path_id}",
+        path=f"/{path_id}",
         method="PUT",
         headers=dict(request.headers),
         body=body
@@ -69,23 +61,25 @@ async def update_path(path_id: str, request: Request, token_payload: dict = Depe
     return response["content"]
 
 @router.delete("/{path_id}")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def delete_path(path_id: str, request: Request, token_payload: dict = Depends(verify_token)):
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path=f"/paths/{path_id}",
+        path=f"/{path_id}",
         method="DELETE",
         headers=dict(request.headers)
     )
     return response["content"]
 
 @router.post("/{path_id}/obstacles")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def add_obstacle(path_id: str, request: Request, token_payload: dict = Depends(verify_token)):
     body = await request.json()
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path=f"/paths/{path_id}/obstacles",
+        path=f"/{path_id}/obstacles",
         method="POST",
         headers=dict(request.headers),
         body=body
@@ -93,11 +87,12 @@ async def add_obstacle(path_id: str, request: Request, token_payload: dict = Dep
     return response["content"]
 
 @router.get("/{path_id}/obstacles")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def get_obstacles(path_id: str, request: Request, token_payload: Optional[dict] = Depends(optional_verify_token)):
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path=f"/paths/{path_id}/obstacles",
+        path=f"/{path_id}/obstacles",
         method="GET",
         headers=dict(request.headers),
         query_params=dict(request.query_params)
@@ -105,11 +100,12 @@ async def get_obstacles(path_id: str, request: Request, token_payload: Optional[
     return response["content"]
 
 @router.get("/user/{user_id}")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def get_user_paths(user_id: str, request: Request, token_payload: dict = Depends(verify_token)):
     response = await proxy.forward_request(
         service_name="path-service",
         service_url=settings.PATH_SERVICE_URL,
-        path=f"/paths/user/{user_id}",
+        path=f"/user/{user_id}",
         method="GET",
         headers=dict(request.headers),
         query_params=dict(request.query_params)
