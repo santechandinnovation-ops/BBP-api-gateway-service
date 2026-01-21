@@ -92,3 +92,17 @@ async def complete_trip(trip_id: str, request: Request, token_payload: dict = De
         body=body
     )
     return create_response_from_proxy(response)
+
+
+@router.delete("/{trip_id}")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
+async def delete_trip(trip_id: str, request: Request, token_payload: dict = Depends(verify_token)):
+    """Delete a trip and all its associated data."""
+    response = await proxy.forward_request(
+        service_name="trip-service",
+        service_url=settings.TRIP_SERVICE_URL,
+        path=f"/trips/{trip_id}",
+        method="DELETE",
+        headers=dict(request.headers)
+    )
+    return create_response_from_proxy(response)
