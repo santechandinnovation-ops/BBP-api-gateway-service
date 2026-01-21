@@ -62,6 +62,23 @@ async def add_coordinate(trip_id: str, request: Request, token_payload: dict = D
     )
     return create_response_from_proxy(response)
 
+
+@router.post("/{trip_id}/coordinates/batch")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
+async def add_coordinates_batch(trip_id: str, request: Request, token_payload: dict = Depends(verify_token)):
+    """Add multiple coordinates in a single request (used when stopping a trip)."""
+    body = await request.json()
+    response = await proxy.forward_request(
+        service_name="trip-service",
+        service_url=settings.TRIP_SERVICE_URL,
+        path=f"/trips/{trip_id}/coordinates/batch",
+        method="POST",
+        headers=dict(request.headers),
+        body=body
+    )
+    return create_response_from_proxy(response)
+
+
 @router.put("/{trip_id}/complete")
 @limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def complete_trip(trip_id: str, request: Request, token_payload: dict = Depends(verify_token)):
