@@ -7,8 +7,7 @@
 - Gli URL dei tre microservizi già deployati
 
 ## Step di Deployment
-  efne
-
+  
 ### 1. Preparazione Repository
 
 Assicurati che il repository contenga:
