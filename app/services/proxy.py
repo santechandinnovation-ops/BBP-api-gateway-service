@@ -51,7 +51,7 @@ class ServiceProxy:
 
             print(f"[CIRCUIT BREAKER DEBUG] Service: {service_name}, Status: {response.status_code}")
 
-            # Only 5xx errors are service failures. 4xx (including 404) are valid responses
+            # only 5xx erros are actual service failures. 4xx (including 404) are valid responses
             if response.status_code >= 500:
                 print(f"[CIRCUIT BREAKER] Recording FAILURE for {service_name} (status={response.status_code})")
                 circuit_breaker.record_failure(service_name)
