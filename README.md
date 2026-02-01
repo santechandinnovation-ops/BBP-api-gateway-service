@@ -23,17 +23,18 @@ This service acts as a single entry point for all client requests, routing them 
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| POST | `/api/auth/register` | User registration |
-| POST | `/api/auth/login` | User login |
-| POST | `/api/auth/logout` | User logout |
-| GET | `/api/users/profile` | Get user profile |
-| GET | `/api/paths/search` | Search bike paths |
-| POST | `/api/paths/manual` | Create manual path |
-| POST | `/api/trips` | Create new trip |
-| GET | `/api/trips` | List user trips |
+| Method | Endpoint                | Description         |
+|--------|-------------------------|---------------------|
+| GET    | `/health`               | Health check        |
+| POST   | `/api/auth/register`    | User registration   |
+| POST   | `/api/auth/login`       | User login          |
+| POST   | `/api/auth/logout`      | User logout         |
+| GET    | `/api/users/profile`    | Get user profile    |
+| GET    | `/api/paths/search`     | Search bike paths   |
+| POST   | `/api/paths/manual`     | Create manual path  |
+| POST   | `/api/trips`            | Create new trip     |
+| GET    | `/api/trips`            | List user trips     |
+
 
 ## Environment Variables
 
